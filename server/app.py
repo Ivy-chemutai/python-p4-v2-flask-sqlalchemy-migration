@@ -1,9 +1,9 @@
 # server/app.py
 
-from flask import Flask
-from flask_migrate import Migrate
+from flask import Flask #type: ignore
+from flask_migrate import Migrate  # type: ignore  
 
-from models import db
+from models import db, Employee, Department
 
 # create a Flask application instance 
 app = Flask(__name__)
@@ -20,6 +20,16 @@ migrate = Migrate(app, db)
 # initialize the Flask application to use the database
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
+
+@app.route('/')
+def index():
+    employees = db.session.execute(db.select(Employee)).scalars().all()
+    departments = db.session.execute(db.select(Department)).scalars().all()
+    return f'Employees: {len(employees)}, Departments: {len(departments)}'
+
 
 if __name__ == '__main__':
-    app.run(port=5555, debug=True)
+    app.run(port=5556, debug=True)
